@@ -8,6 +8,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @AllArgsConstructor
 @RestController
@@ -41,7 +44,15 @@ public class ProductController {
     public ResponseEntity<ProductDTO> updateProduct(@RequestBody ProductDTO productDTO, @PathVariable Long productId) {
 
         ProductDTO updatedProductDTO = productService.updateProduct(productDTO, productId);
-        return  new ResponseEntity<>(updatedProductDTO, HttpStatus.OK);
+        return new ResponseEntity<>(updatedProductDTO, HttpStatus.OK);
+    }
+
+    @PutMapping("/products/{productId}/image")
+    public ResponseEntity<ProductDTO> updateProductImage(@PathVariable Long productId,
+                                                         @RequestParam("image") MultipartFile image) throws IOException {
+        ProductDTO updatedProduct = productService.updatedProductImage(productId, image);
+        return new ResponseEntity<>(updatedProduct, HttpStatus.OK);
+
     }
 
     @DeleteMapping("admin/products/{productId}")
