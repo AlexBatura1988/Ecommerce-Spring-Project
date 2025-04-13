@@ -10,4 +10,5 @@ import java.util.List;
 @Repository
 public interface ProductRepo extends JpaRepository<Product, Long> {
     List<Product> findByCategoryOrderByPriceAsc(Category category);
+
 }
