@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -47,7 +48,7 @@ public class CartServiceImpl implements CartService {
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "ProductId", productId));
         // Perform Validation
         CartItem cartItem = cartItemRepository.findCartItemByProductIdAndCartId(cart.getCartId(), productId);
-        if(cartItem != null){
+        if (cartItem != null) {
             throw new APIException("Product " + product.getProductName() + " already exist in cart!!");
         }
 
@@ -87,6 +88,24 @@ public class CartServiceImpl implements CartService {
 
         return cartDTO;
     }
+
+    @Override
+    public List<CartDTO> getAllCarts() {
+        List<Cart> carts = cartRepo.findAll();
+        if (carts.size() == 0) {
+            throw new APIException("No Cart exist in DB");
+        }
+        List<CartDTO> cartDTOS = carts.stream().map(cart -> {
+            CartDTO cartDTO = modelMapper.map(cart, CartDTO.class);
+
+            List<ProductDTO> products = cart.getCartItems().stream()
+                    .map(p -> modelMapper.map(p.getProduct(), ProductDTO.class)).collect(Collectors.toList());
+            cartDTO.setProducts(products);
+            return cartDTO;
+        }).collect(Collectors.toList());
+        return cartDTOS;
+    }
+
 
     private Cart createCart() {
 
