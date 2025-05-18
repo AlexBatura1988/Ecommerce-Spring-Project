@@ -135,23 +135,23 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductDTO updateProduct(ProductDTO productDTO, Long productId) {
 
-        Product savedProduct = productRepo.findById(productId)
+        Product productFromDb = productRepo.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "productId", productId));
+
         Product product = modelMapper.map(productDTO, Product.class);
-        product.setProductId(productId);
-        product.setCategory(savedProduct.getCategory());
-        product.setProductName(productDTO.getProductName());
-        product.setImage("default.png");
-        product.setDescription(product.getDescription());
-        product.setQuantity(product.getQuantity());
-        product.setPrice(productDTO.getPrice());
-        product.setDiscount(productDTO.getDiscount());
-        double specialPrice = product.getPrice() - ((product.getDiscount() * 0.01) * product.getPrice());
-        product.setSpecialPrice(specialPrice);
-        savedProduct = productRepo.save(product);
+
+        productFromDb.setProductName(product.getProductName());
+        productFromDb.setDescription(product.getDescription());
+        productFromDb.setQuantity(product.getQuantity());
+        productFromDb.setDiscount(product.getDiscount());
+        productFromDb.setPrice(product.getPrice());
+        productFromDb.setSpecialPrice(product.getSpecialPrice());
+
+        Product savedProduct = productRepo.save(productFromDb);
 
         //Update Cart
         List<Cart> carts = cartRepo.findCartsByProductId(productId);
+
         List<CartDTO> cartDTOS = carts.stream().map(cart -> {
             CartDTO cartDTO = modelMapper.map(cart, CartDTO.class);
 
@@ -161,6 +161,7 @@ public class ProductServiceImpl implements ProductService {
             cartDTO.setProducts(products);
             return cartDTO;
         }).collect(Collectors.toList());
+
 
         cartDTOS.forEach(cart -> cartService.updateProductInCarts(cart.getCartId(),productId));
 
